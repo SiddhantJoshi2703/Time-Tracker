@@ -1,7 +1,13 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "Time Tracker",
   "version": "1.0",
-  "description":"Tracks the total time of your visit on various websites"
+  "description":"Tracks the total time of your visit on various websites",
+  "browser_action": {
+    
+    "default_popup": "popup.html",
+    "default_title": "Time Tracker"
+}
+
 
 }  
