@@ -4,10 +4,18 @@
   "version": "1.0",
   "description":"Tracks the total time of your visit on various websites",
   "browser_action": {
-    
+    "default_icon": "icon16.png",
     "default_popup": "popup.html",
     "default_title": "Time Tracker"
-}
-
+  },
+  "background": {
+      "scripts": ["Js/eventPage.js"]
+  },
+  "permissions": [
+      "idle",
+      "tabs",
+      "notifications"
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval' https://www.gstatic.com; object-src 'self'"
 
 }  
