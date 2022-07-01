@@ -513,7 +513,7 @@ function drawTable(table_data) {
 document.addEventListener("DOMContentLoaded", function () {
   document.querySelector("#options").addEventListener("click", function() {
     chrome.tabs.create({
-      url: "options.html",
+      url: "html/options.html",
     });
   });
 });

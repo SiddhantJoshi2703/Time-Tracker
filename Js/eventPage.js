@@ -175,7 +175,7 @@ function updateData() {
   if(total.today >= daily_limit && localStorage["flag"]==0){
     var notifOptions = {
         type: 'basic',
-        iconUrl: 'icon48.png',
+        iconUrl: '..\Images\icon48.png',
         title: 'Limit Reached for Today',
         message: "Your Web Time has finished for the Day !!!"
     };
