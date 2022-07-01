@@ -96,3 +96,92 @@ function checkDate() {
     localStorage["date"] = todayStr;
   }
 }
+
+// Extract the domain from the url
+// e.g. http://google.com/ -> google.com
+function extractDomain(url) {
+  var re = /:\/\/(www\.)?(.+?)\//;
+  return url.match(re)[2];
+}
+
+function inBlacklist(url) {
+  if (!url.match(/^http/)) {
+    return true;
+  }
+  return false;
+}
+
+// Update the data
+function updateData() {
+  // Only count time if system has not been idle for 30 seconds
+  chrome.idle.queryState(30, function (state) {
+    if (state === "active") {
+      // Select single active tab from focused window
+      chrome.tabs.query({ lastFocusedWindow: true, active: true }, function (
+        tabs
+      ) {
+        if (tabs.length === 0) {
+          return;
+        }
+        var tab = tabs[0];
+        // Make sure 'today' is up-to-date
+        checkDate();
+        if (!inBlacklist(tab.url)) {
+          var domain = extractDomain(tab.url);
+          // Add domain to domain list if not already present
+          var domains = JSON.parse(localStorage["domains"]);
+          if (!(domain in domains)) {
+            domains[domain] = 1;
+            localStorage["domains"] = JSON.stringify(domains);
+          }
+          var domain_data;
+          if (localStorage[domain]) {
+            domain_data = JSON.parse(localStorage[domain]);
+          } else {
+            domain_data = {
+              today: 0
+            };
+          }
+          domain_data.today += UPDATE_INTERVAL;
+          localStorage[domain] = JSON.stringify(domain_data);
+          // Update total time
+          var total = JSON.parse(localStorage["total"]);
+          total.today += UPDATE_INTERVAL;
+          localStorage["total"] = JSON.stringify(total);
+          // Update badge with number of minutes spent on
+          // current site
+          var num_min = Math.floor(domain_data.today / 60).toString();
+          if (num_min.length < 4) {
+            num_min += "m";
+          }
+          chrome.browserAction.setBadgeText({
+            text: num_min,
+          });
+        } else {
+          // Clear badge
+          chrome.browserAction.setBadgeText({
+            text: "",
+          });
+        }
+      });
+    }
+  });
+  var h = parseInt(localStorage["daily_limit_hr"], 10);
+  var m = parseInt(localStorage["daily_limit_min"], 10);
+  var s = parseInt(localStorage["daily_limit_sec"], 10);
+  var total = JSON.parse(localStorage["total"]);
+  var daily_limit = 3600*h + 60*m + s;
+  //display notification if the total time is exceeds the set limit
+  if(total.today >= daily_limit && localStorage["flag"]==0){
+    var notifOptions = {
+        type: 'basic',
+        iconUrl: 'icon48.png',
+        title: 'Limit Reached for Today',
+        message: "Your Web Time has finished for the Day !!!"
+    };
+    chrome.notifications.create('limitNotif', notifOptions);
+    localStorage["flag"]=1;
+  }
+}
+// Update timer data every UPDATE_INTERVAL seconds
+setInterval(updateData, UPDATE_INTERVAL * 1000);
